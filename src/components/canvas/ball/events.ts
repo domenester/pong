@@ -1,5 +1,5 @@
 import { Panel } from "../panel";
-import { Ball } from "../ball";
+import { Ball } from "./ball";
 import { Stick } from "../stick";
 
 export class BallEvents {
@@ -25,16 +25,6 @@ export class BallEvents {
     if (this.timesHit % 3 === 0) {
       this.ball.speedUpMove()
     }
-  }
-
-  touchStick = () => {
-    const { ball, leftStick } = this
-    const ballY = this.ball.position.getY()
-    const stickY = this.leftStick.position.getY()
-    const touchX = ball.leftSide <= leftStick.width
-    const touchY = ballY >= stickY
-    const ballOnStick = ballY <= this.leftStick.height + stickY
-    return touchX && touchY && ballOnStick
   }
 
   triggers: any = {
@@ -94,8 +84,6 @@ export class BallEvents {
   triggerReset = () => {
     clearInterval(this.interval)
     this.timesHit = 0
-    this.ball.clear()
-    this.ball.resetSpeed()
     this.panel.reset()
     this.lastAction = this.initialAction
     setTimeout(this.defineInterval, 2000)
@@ -111,16 +99,16 @@ export class BallEvents {
   }
 
   touchUp = () => {
-    return this.ball.position.getY() - this.panel.barHeight <= this.ball.width
+    return this.ball.position.getY() <= this.ball.width
   }
 
   touchLeft = () => {
     const touch = this.ball.position.getX() <= this.ball.width
     if (touch) {
-      if (this.touchStick()) {
+      if (this.ball.touchStick()) {
         this.timesHit = this.timesHit + 1
         this.panel.increaseScore()
-        this.panel.infoBar.print()
+        // this.panel.infoBar.print()
         this.speedUp()
         return true
       }

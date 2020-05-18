@@ -1,4 +1,5 @@
-import { Position } from "./position";
+import { Position } from "../position";
+import { Panel } from "../panel";
 
 export class Ball {
 
@@ -8,10 +9,11 @@ export class Ball {
 
   constructor(
     public ctx: any,
+    public panel: Panel,
     public position: Position,
     public color: string,
     public width: number,
-    public height: number
+    public height: number,
   ) {
     this.speed = 2
     this.setLeftSide()
@@ -25,10 +27,20 @@ export class Ball {
     this.speed = 2
   }
 
+  touchStick = () => {
+    const { leftStick } = this.panel
+    const ballY = this.position.getY()
+    const stickY = leftStick.position.getY()
+    const touchX = this.leftSide <= leftStick.width
+    const touchY = ballY >= stickY
+    const ballOnStick = ballY <= leftStick.height + stickY
+    return touchX && touchY && ballOnStick
+  }
+
   clear = () => {
     const { getX } = this.position
     let diff = 0
-    if (this.leftSide < this.width) {
+    if (this.touchStick() && this.leftSide < this.width) {
       diff = this.width - this.leftSide
     }
     this.ctx.clearRect(

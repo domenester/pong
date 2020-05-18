@@ -21,7 +21,6 @@ export class StickEvent {
     const { position: { setY, getY }, height } = this.leftStick
     const higher = this.panel.height - height
     let newY = y > higher ? higher : y
-    newY = newY <= this.panel.barHeight ? this.panel.barHeight : newY
     if (newY !== getY()) {
       this.leftStick.clear()
       setY( newY > higher ? higher : newY )
