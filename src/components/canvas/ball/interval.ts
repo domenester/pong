@@ -1,12 +1,14 @@
-import { BallEvents } from "./events"
 import { BallTriggers } from "./triggers"
+import { BallEventsMultiPlayer } from "./events/multi-player.events"
+import { BallEventsSinglePlayer } from "./events/single-player.events"
 
 export const BallInterval = (
-  ballEvents: BallEvents
+  ballEvents: BallEventsMultiPlayer | BallEventsSinglePlayer
 ) => {
   const triggers: any = BallTriggers(ballEvents.ball)
   return {
     init: () => {
+      let trigger
       if (ballEvents.touchDown()) {
         if (ballEvents.touchLeft()) {
           return (
@@ -20,10 +22,9 @@ export const BallInterval = (
               `touchDownAndRightFrom${ballEvents.lastActionUpper()}`
             ]())
         }
-        return (
-          ballEvents.lastAction = triggers[
-            `touchDownFrom${ballEvents.lastActionUpper()}`
-          ]())
+        trigger = triggers[ `touchDownFrom${ballEvents.lastActionUpper()}` ]
+        if (trigger) ballEvents.lastAction = trigger()
+        return
       }
 
       if (ballEvents.touchUp()) {
@@ -39,10 +40,10 @@ export const BallInterval = (
               `touchUpAndRightFrom${ballEvents.lastActionUpper()}`
             ]())
         }
-        return (
-          ballEvents.lastAction = triggers[
-            `touchUpFrom${ballEvents.lastActionUpper()}`
-          ]())
+
+        trigger = triggers[ `touchUpFrom${ballEvents.lastActionUpper()}` ]
+        if (trigger) ballEvents.lastAction = trigger()
+        return
       }
 
       if (ballEvents.touchRight()) {
@@ -58,7 +59,6 @@ export const BallInterval = (
             `touchLeftFrom${ballEvents.lastActionUpper()}`
           ]())
       }
-
       (ballEvents.ball as any)[ballEvents.lastAction]()
     }
   }

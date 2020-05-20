@@ -1,6 +1,8 @@
 import { TDispatch } from "../../../shared/state-handler";
 import { ISocketService } from "../../../services";
 import { Panel, mode } from ".";
+import { BallEventsSinglePlayer } from "../ball/events/single-player.events";
+import { StickEventSinglePlayer } from "../stick/events/single-player.events";
 
 export class PanelSinglePlayer extends Panel {
 
@@ -20,11 +22,19 @@ export class PanelSinglePlayer extends Panel {
     )
   }
 
+  bootstrap = () => {
+    this.drawElements()
+    const ballEvents = new BallEventsSinglePlayer(this)
+    ballEvents.bootstrap()
+    const stickEvents = new StickEventSinglePlayer(this)
+    stickEvents.bootstrap()
+  }
+
   resetSticks = () => {
     this.leftStick.reset()
   }
 
-  drawElements() {
+  drawElements = () => {
     const { leftStick, ball } = this
     leftStick.print()
     ball.print()

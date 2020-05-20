@@ -1,5 +1,6 @@
 import { Panel } from "../panel";
 import { Stick } from "../stick";
+import { PanelMultiPlayer } from "../panel/multi-player";
 
 export class KeyboardEvents {
 
@@ -38,12 +39,12 @@ export class KeyboardEvents {
   }
 
   handleArrowUp = () => {
-    const { rightStick, moveSize } = this.panel
+    const { rightStick, moveSize } = this.panel as PanelMultiPlayer
     this.handleUp(rightStick, moveSize)
   }
 
   handleArrowDown = () => {
-    const { rightStick, moveSize, height } = this.panel
+    const { rightStick, moveSize, height } = this.panel as PanelMultiPlayer
     this.handleDown(rightStick, moveSize, height)
   }
 

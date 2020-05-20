@@ -1,36 +1,30 @@
-import { Panel } from "../panel";
 import { Stick } from "../stick";
+import { PanelSinglePlayer } from "../../panel/single-player";
+import { PanelMultiPlayer } from "../../panel/multi-player";
+import { Panel } from "../../panel";
 
 export class StickEvent {
 
   public leftStick: Stick
-  public rightStick: Stick
   public lastSceenY = 0
 
   constructor(
-    private panel: Panel
+    public panel: Panel
   ) {
     this.leftStick = panel.leftStick
-    this.rightStick = panel.rightStick
   }
 
-  bootstrap = () => {
+  bootstrap() {
     document.addEventListener('mousemove', this.onMouseMoveHandler);
-    this.panel.socketService.onMoveStick(
-      (data: any) => {
-        this.handleStickMove(data.y, this.panel.getOtherPlayer())
-      }
-    )
   }
 
   onMouseMoveHandler = (mouseEvent: any) => {
     const { y } = mouseEvent
-    this.panel.socketService.stickMoved(y, this.panel.getOtherPlayer(), this.panel.room)
     this.handleStickMove(y, this.panel.player)
   }
 
   handleStickMove = (y: number, player: number) => {
-    const stickToHandle = player === 1 ? this.leftStick : this.rightStick
+    const stickToHandle = this.leftStick
     const { position: { setY, getY }, height } = stickToHandle
     const { topBarHeight } = this.panel
     const top = (this.panel.height + topBarHeight) - height

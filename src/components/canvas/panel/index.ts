@@ -1,15 +1,13 @@
 import { Position } from "../position";
 import { Stick } from "../stick";
 import { Ball } from "../ball";
-import { BallEvents } from "../ball/events";
-import { StickEvent } from "../stick";
 import { getDimensions } from "../../panel/util";
 import { TDispatch } from "../../../shared/state-handler";
 import { ISocketService } from "../../../services";
 
 export type mode = 'singleplayer' | 'multiplayer'
 
-export class Panel {
+export abstract class Panel {
 
   public defaultColor = '#000'
 
@@ -22,7 +20,6 @@ export class Panel {
   public moveSize: number
 
   public leftStick: Stick
-  public rightStick: Stick
   public ball: Ball
 
   public score = 0
@@ -55,16 +52,6 @@ export class Panel {
       this.stickWidth,
       this.stickHeight
     )
-    this.rightStick = new Stick(
-      this.ctx,
-      new Position(
-        this.width - this.stickWidth,
-        mode === 'multiplayer' ? 0 : Infinity
-      ),
-      this.defaultColor,
-      this.stickWidth,
-      this.stickHeight
-    )
     this.ball = new Ball(
       this.ctx,
       this,
@@ -78,29 +65,17 @@ export class Panel {
     )
   }
 
-  isMultiplayer = () => {
-    return this.mode === 'multiplayer'
-  }
-
-  getOtherPlayer = () => {
-    return this.player === 1 ? 2 : 1
-  }
-
   increaseScore = () => {
     this.score = this.score + 1
     this.dispatch({
       type: 'setPanel',
-      payload: {
-        score: this.score
-      }
+      payload: { score: this.score }
     })
     if (this.score > this.higherScore) {
       this.higherScore = this.score
       this.dispatch({
         type: 'setPanel',
-        payload: {
-          higherScore: this.score
-        }
+        payload: { higherScore: this.score }
       })
     }
   }
@@ -108,10 +83,7 @@ export class Panel {
   reset = () => {
     this.dispatch({
       type: 'setPanel',
-      payload: {
-        score: 0,
-        lastScore: this.score
-      }
+      payload: { score: 0, lastScore: this.score }
     })
     this.score = 0
     this.ball.clear()
@@ -119,25 +91,5 @@ export class Panel {
     this.ball.position.reset()
   }
 
-  resetSticks = () => {
-    this.leftStick.reset()
-    this.rightStick.reset()
-  }
-
-  bootstrap = () => {
-    this.drawElements()
-    const ballEvents = new BallEvents(this)
-    ballEvents.bootstrap()
-    const mouseEvents = new StickEvent(this)
-    mouseEvents.bootstrap()
-  }
-
-  drawElements() {
-    const { leftStick, ball, mode, rightStick } = this
-    leftStick.print()
-    ball.print()
-    if (mode === 'multiplayer') {
-      rightStick.print()
-    }
-  }
+  abstract drawElements: () => void
 }

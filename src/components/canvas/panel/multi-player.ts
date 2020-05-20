@@ -3,6 +3,8 @@ import { Stick } from "../stick";
 import { TDispatch } from "../../../shared/state-handler";
 import { ISocketService } from "../../../services";
 import { Panel, mode } from ".";
+import { BallEventsMultiPlayer } from "../ball/events/multi-player.events";
+import { StickEventMultiPlayer } from "../stick/events/multi-player.events";
 
 export class PanelMultiPlayer extends Panel {
 
@@ -34,6 +36,14 @@ export class PanelMultiPlayer extends Panel {
     )
   }
 
+  bootstrap = () => {
+    this.drawElements()
+    const ballEvents = new BallEventsMultiPlayer(this)
+    ballEvents.bootstrap()
+    const stickEvents = new StickEventMultiPlayer(this)
+    stickEvents.bootstrap()
+  }
+
   isMultiplayer = () => {
     return this.mode === 'multiplayer'
   }
@@ -47,7 +57,7 @@ export class PanelMultiPlayer extends Panel {
     this.rightStick.reset()
   }
 
-  drawElements() {
+  drawElements = () => {
     const { leftStick, ball, rightStick } = this
     leftStick.print()
     ball.print()

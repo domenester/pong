@@ -1,5 +1,6 @@
 import { Position } from "../position";
 import { Panel } from "../panel";
+import { PanelMultiPlayer } from "../panel/multi-player";
 
 export class Ball {
 
@@ -30,7 +31,7 @@ export class Ball {
   }
 
   touchStick = () => {
-    return this.touchLeftStick() || this.touchRightStick()
+    return this.touchLeftStick() || (this.panel.mode === 'multiplayer' && this.touchRightStick())
   }
 
   touchLeftStick = () => {
@@ -44,7 +45,7 @@ export class Ball {
   }
 
   touchRightStick = () => {
-    const { rightStick } = this.panel
+    const { rightStick } = this.panel as PanelMultiPlayer
     const ballY = this.position.getY()
     const stickY = rightStick.position.getY()
     const touchX = this.getRightSide() >= this.panel.width - rightStick.width
