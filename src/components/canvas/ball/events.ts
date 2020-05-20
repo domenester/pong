@@ -1,6 +1,7 @@
 import { Panel } from "../panel";
 import { Ball } from "./ball";
 import { Stick } from "../stick";
+import { BallInterval } from "./interval";
 
 export class BallEvents {
 
@@ -18,6 +19,10 @@ export class BallEvents {
   public interval: any
 
   bootstrap = () => {
+    if (this.panel.mode === 'multiplayer') {
+      this.panel.socketService.onStartGame(this.countDownToStartGame)
+      return this.panel.socketService.onBallOver(this.triggerReset)
+    }
     this.defineInterval()
   }
 
@@ -25,57 +30,6 @@ export class BallEvents {
     if (this.timesHit % 3 === 0) {
       this.ball.speedUpMove()
     }
-  }
-
-  triggers: any = {
-    'touchRightFromMoveUpRight': () => {
-      this.ball.moveUpLeft()
-      return 'moveUpLeft'
-    },
-    'touchRightFromMoveDownRight': () => {
-      this.ball.moveDownLeft()
-      return 'moveDownLeft'
-    },
-    'touchLeftFromMoveUpLeft': () => {
-      this.ball.moveUpRight()
-      return 'moveUpRight'
-    },
-    'touchLeftFromMoveDownLeft': () => {
-      this.ball.moveDownRight()
-      return 'moveDownRight'
-    },
-    'touchDownFromMoveDownRight': () => {
-      this.ball.moveUpRight()
-      return 'moveUpRight'
-    },
-    'touchDownAndRightFromMoveDownRight': () => {
-      this.ball.moveUpLeft()
-      return 'moveUpLeft'
-    },
-    'touchDownFromMoveDownLeft': () => {
-      this.ball.moveUpLeft()
-      return 'moveUpLeft'
-    },
-    'touchDownAndLeftFromMoveDownLeft': () => {
-      this.ball.moveUpRight()
-      return 'moveUpRight'
-    },
-    'touchUpFromMoveUpRight': () => {
-      this.ball.moveDownRight()
-      return 'moveDownRight'
-    },
-    'touchUpAndRightFromMoveUpRight': () => {
-      this.ball.moveDownLeft()
-      return 'moveDownLeft'
-    },
-    'touchUpFromMoveUpLeft': () => {
-      this.ball.moveDownLeft()
-      return 'moveDownLeft'
-    },
-    'touchUpAndLeftFromMoveUpLeft': () => {
-      this.ball.moveDownRight()
-      return 'moveDownRight'
-    },
   }
 
   initialAction: string = 'moveDownRight'
@@ -86,7 +40,7 @@ export class BallEvents {
     this.timesHit = 0
     this.panel.reset()
     this.lastAction = this.initialAction
-    setTimeout(this.defineInterval, 2000)
+    setTimeout(() => this.defineInterval(), 2000)
   }
 
   lastActionUpper = () => {
@@ -105,78 +59,61 @@ export class BallEvents {
   touchLeft = () => {
     const touch = this.ball.position.getX() <= this.ball.width
     if (touch) {
-      if (this.ball.touchStick()) {
+      if (this.ball.touchLeftStick()) {
         this.timesHit = this.timesHit + 1
         this.panel.increaseScore()
-        // this.panel.infoBar.print()
         this.speedUp()
         return true
       }
+      this.panel.socketService.ballOver(
+        this.panel.room,
+        this.panel.getOtherPlayer()
+      )
       this.triggerReset()
     }
   }
 
   touchRight = () => {
-    return this.ball.position.getX() >= this.panel.width - this.ball.width
+    const touch = this.ball.position.getX() >= this.panel.width - this.ball.width
+    if (touch) {
+      if (!this.panel.isMultiplayer()) {
+        return true
+      }
+      if (this.ball.touchRightStick()) {
+        this.timesHit = this.timesHit + 1
+        this.panel.increaseScore()
+        return true
+      }
+      this.panel.socketService.ballOver(
+        this.panel.room,
+        this.panel.getOtherPlayer()
+      )
+      this.triggerReset()
+    }
+  }
+
+  countDownToStartGame = () => {
+    let value = 3
+    this.panel.resetSticks()
+    const counterDown = setInterval(
+      () => {
+        this.panel.dispatch({
+          type: 'setCounterDown',
+          payload: { value }
+        })
+        if (value === 0) {
+          this.defineInterval()
+          clearInterval(counterDown)
+        }
+        value--
+      },
+      1000
+    )
   }
 
   defineInterval = () => {
     this.interval = setInterval(
-      () => {
-        if (this.touchDown()) {
-          if (this.touchLeft()) {
-            return (
-              this.lastAction = this.triggers[
-                `touchDownAndLeftFrom${this.lastActionUpper()}`
-              ]())
-          }
-          if (this.touchRight()) {
-            return (
-              this.lastAction = this.triggers[
-                `touchDownAndRightFrom${this.lastActionUpper()}`
-              ]())
-          }
-          return (
-            this.lastAction = this.triggers[
-              `touchDownFrom${this.lastActionUpper()}`
-            ]())
-        }
-
-        if (this.touchUp()) {
-          if (this.touchLeft()) {
-            return (
-              this.lastAction = this.triggers[
-                `touchUpAndLeftFrom${this.lastActionUpper()}`
-              ]())
-          }
-          if (this.touchRight()) {
-            return (
-              this.lastAction = this.triggers[
-                `touchUpAndRightFrom${this.lastActionUpper()}`
-              ]())
-          }
-          return (
-            this.lastAction = this.triggers[
-              `touchUpFrom${this.lastActionUpper()}`
-            ]())
-        }
-
-        if (this.touchRight()) {
-          return (
-            this.lastAction = this.triggers[
-              `touchRightFrom${this.lastActionUpper()}`
-            ]())
-        }
-
-        if (this.touchLeft()) {
-          return (
-            this.lastAction = this.triggers[
-              `touchLeftFrom${this.lastActionUpper()}`
-            ]())
-        }
-
-        (this.ball as any)[this.lastAction]()
-      }, 5
+      () => BallInterval(this).init(), 5
     )
   }
 }

@@ -5,7 +5,6 @@ export class Ball {
 
   public size = 10
   public speed: number
-  public leftSide: number = 0
 
   constructor(
     public ctx: any,
@@ -16,11 +15,14 @@ export class Ball {
     public height: number,
   ) {
     this.speed = 2
-    this.setLeftSide()
   }
 
-  setLeftSide = () => {
-    this.leftSide = this.position.getX() - this.width
+  getLeftSide = () => {
+    return this.position.getX() - this.width
+  }
+
+  getRightSide = () => {
+    return this.position.getX() + this.width
   }
 
   resetSpeed = () => {
@@ -28,25 +30,55 @@ export class Ball {
   }
 
   touchStick = () => {
+    return this.touchLeftStick() || this.touchRightStick()
+  }
+
+  touchLeftStick = () => {
     const { leftStick } = this.panel
     const ballY = this.position.getY()
     const stickY = leftStick.position.getY()
-    const touchX = this.leftSide <= leftStick.width
+    const touchX = this.getLeftSide() <= leftStick.width
     const touchY = ballY >= stickY
     const ballOnStick = ballY <= leftStick.height + stickY
     return touchX && touchY && ballOnStick
   }
 
+  touchRightStick = () => {
+    const { rightStick } = this.panel
+    const ballY = this.position.getY()
+    const stickY = rightStick.position.getY()
+    const touchX = this.getRightSide() >= this.panel.width - rightStick.width
+    const touchY = ballY >= stickY
+    const ballOnStick = ballY <= rightStick.height + stickY
+    return touchX && touchY && ballOnStick
+  }
+
+  rightStickWidth = () => {
+    return this.panel.width - this.width
+  }
+
   clear = () => {
     const { getX } = this.position
     let diff = 0
-    if (this.touchStick() && this.leftSide < this.width) {
-      diff = this.width - this.leftSide
+    let touchedAt = 'left'
+
+    if (this.touchStick()) {
+      if (this.getLeftSide() < this.width) {
+        diff = this.width - this.getLeftSide()
+      }
+      if (this.getRightSide() > this.rightStickWidth()) {
+        touchedAt = 'right'
+        diff = this.getRightSide() - this.rightStickWidth()
+      }
     }
+
+    const startX = touchedAt === 'left' ? getX() - this.width + diff : getX() + this.width - diff
+    const sizeX = touchedAt === 'left' ? (this.width + diff) * 2 : (this.width + diff) * -2
+
     this.ctx.clearRect(
-      getX() - this.width + diff,
-      this.position.getY() - this.width,
-      (this.width + diff) * 2,
+      startX,
+      this.position.getY() - this.height,
+      sizeX,
       this.height * 2
     );
   }
@@ -99,7 +131,6 @@ export class Ball {
       2 * Math.PI
     );
     this.ctx.fill();
-    this.setLeftSide()
   }
 
 }

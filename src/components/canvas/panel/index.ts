@@ -1,16 +1,25 @@
 import { Position } from "../position";
 import { Stick } from "../stick";
 import { Ball } from "../ball";
-import { KeyboardEvents } from "../events";
-import { BallEvents } from "../ball";
+import { BallEvents } from "../ball/events";
 import { StickEvent } from "../stick";
+import { getDimensions } from "../../panel/util";
+import { TDispatch } from "../../../shared/state-handler";
+import { ISocketService } from "../../../services";
+
+export type mode = 'singleplayer' | 'multiplayer'
 
 export class Panel {
 
   public defaultColor = '#000'
-  public stickWidth = Math.ceil(this.width / 100)
-  public stickHeight = Math.ceil(this.height / 5)
-  public moveSize = Math.ceil(this.width / 50)
+
+  public ctx: any
+  public width: number
+  public height: number
+  public topBarHeight: number
+  public stickWidth: number
+  public stickHeight: number
+  public moveSize: number
 
   public leftStick: Stick
   public rightStick: Stick
@@ -20,11 +29,25 @@ export class Panel {
   public higherScore = 0
 
   constructor(
-    public ctx: any,
-    public width: number,
-    public height: number,
-    public setters: any
+    public mode: mode,
+    public dispatch: TDispatch,
+    public socketService: ISocketService,
+    public player: number,
+    public room: string
   ) {
+    const el: any = document.getElementById('panel')
+    this.ctx = el.getContext("2d")
+
+    const { width, height, topBarHeight } = getDimensions(mode)
+    this.width = width
+    this.height = height
+    this.topBarHeight = topBarHeight
+
+    this.stickWidth = Math.ceil(this.width / 100)
+    this.stickHeight = Math.ceil(this.height / 5)
+
+    this.moveSize = Math.ceil(this.width / 50)
+
     this.leftStick = new Stick(
       this.ctx,
       new Position(0, 0),
@@ -34,7 +57,10 @@ export class Panel {
     )
     this.rightStick = new Stick(
       this.ctx,
-      new Position(this.width - this.stickWidth, 0),
+      new Position(
+        this.width - this.stickWidth,
+        mode === 'multiplayer' ? 0 : Infinity
+      ),
       this.defaultColor,
       this.stickWidth,
       this.stickHeight
@@ -43,8 +69,8 @@ export class Panel {
       this.ctx,
       this,
       new Position(
-        Math.ceil(this.stickWidth * 3),
-        Math.ceil(this.stickWidth * 3)
+        this.stickWidth * 3,
+        this.stickWidth * 3
       ),
       this.defaultColor,
       this.stickWidth,
@@ -52,28 +78,54 @@ export class Panel {
     )
   }
 
+  isMultiplayer = () => {
+    return this.mode === 'multiplayer'
+  }
+
+  getOtherPlayer = () => {
+    return this.player === 1 ? 2 : 1
+  }
+
   increaseScore = () => {
     this.score = this.score + 1
-    this.setters.setScore(this.score)
+    this.dispatch({
+      type: 'setPanel',
+      payload: {
+        score: this.score
+      }
+    })
     if (this.score > this.higherScore) {
       this.higherScore = this.score
-      this.setters.setHigherScore(this.score)
+      this.dispatch({
+        type: 'setPanel',
+        payload: {
+          higherScore: this.score
+        }
+      })
     }
   }
 
   reset = () => {
-    this.setters.setLastScore(this.score)
-    this.setters.setScore(0)
+    this.dispatch({
+      type: 'setPanel',
+      payload: {
+        score: 0,
+        lastScore: this.score
+      }
+    })
     this.score = 0
     this.ball.clear()
     this.ball.resetSpeed()
     this.ball.position.reset()
   }
 
+  resetSticks = () => {
+    this.leftStick.reset()
+    this.rightStick.reset()
+  }
+
   bootstrap = () => {
     this.drawElements()
-    const keyboardEvents = new KeyboardEvents(this)
-    keyboardEvents.bootstrap()
     const ballEvents = new BallEvents(this)
     ballEvents.bootstrap()
     const mouseEvents = new StickEvent(this)
@@ -81,8 +133,11 @@ export class Panel {
   }
 
   drawElements() {
-    const { leftStick, ball } = this
+    const { leftStick, ball, mode, rightStick } = this
     leftStick.print()
     ball.print()
+    if (mode === 'multiplayer') {
+      rightStick.print()
+    }
   }
 }

@@ -10,6 +10,12 @@ export class Stick {
     public height: number
   ) {}
 
+  reset = () => {
+    this.clear()
+    this.position.reset()
+    this.print()
+  }
+
   clear = () => {
     this.ctx.clearRect(
       this.position.getX(),

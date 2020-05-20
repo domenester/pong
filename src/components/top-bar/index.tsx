@@ -1,24 +1,23 @@
 import React from 'react'
 import './top-bar.scss'
+import { useStateValue } from '../../shared/state-handler'
 
 interface ITopBar {
-  height: number,
-  score: number,
-  higherScore: number,
-  lastScore: number
+  height: number
 }
 
 export function TopBar (props: ITopBar) {
+  const { state: { panel, topBar } } = useStateValue()
   return (
-    <div className='top-bar row text-center' style={{height: props.height}}>
+    <div className='top-bar row text-center' style={{height: topBar.height}}>
       <div className='col-4'>
-        Score: {props.score}
+        Score: {panel.score}
       </div>
       <div className='col-4'>
-        Last Score: {props.lastScore}
+        Last Score: {panel.lastScore}
       </div>
       <div className='col-4'>
-        Higher Score: {props.higherScore}
+        Higher Score: {panel.higherScore}
       </div>
     </div>
   )

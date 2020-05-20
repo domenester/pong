@@ -2,40 +2,61 @@ import React, { useEffect, useState } from 'react';
 import './panel.scss';
 import { Panel } from '../canvas/panel';
 import { TopBar } from '../top-bar';
+import { useSocketServiceValue, ISocketService } from '../../services';
+import { getDimensions } from './util';
+import { useStateValue } from '../../shared/state-handler';
+import CounterDown from '../counter-down';
 
-export default function PanelComponent() {
+interface IPanelComponent {
+  mode: 'singleplayer' | 'multiplayer'
+}
 
-  const { clientWidth, clientHeight } = document.documentElement
-  const [width, setWidth] = useState(clientWidth);
-  const [topBarHeight] = useState(width / 20);
-  const [height, setHeight] = useState(clientHeight - topBarHeight);
+export default function PanelComponent({ mode }: IPanelComponent) {
+
+  const socketService: ISocketService = useSocketServiceValue()
+  const { width, height, topBarHeight } = getDimensions(mode)
   let panel: Panel
+  const { dispatch, state: { counterDown } } = useStateValue()
+  const params = window.location.pathname.split('/')
+  params.shift()
 
-  const [score, setScore] = useState(0);
-  const [lastScore, setLastScore] = useState(0);
-  const [higherScore, setHigherScore] = useState(0);
+  const joinRoomIfIsPlayer2 = (player: number) => {
+    return player === 2 && socketService.joinRoom(params[1])
+  }
 
   const init = () => {
-    const el: any = document.getElementById('panel')
-    const canvas = el.getContext("2d")
+
+    dispatch({
+      type: 'setTopBar',
+      payload: {
+        height: topBarHeight    
+      }
+    })
+
+    const lastParam = +params[params.length - 1]
+    const player = Number.isInteger(+lastParam) ? lastParam : 1
+
+    joinRoomIfIsPlayer2(player)
+
     panel = new Panel(
-      canvas,
-      width,
-      height,
-      { setScore, setLastScore, setHigherScore}
+      mode,
+      dispatch,
+      socketService,
+      player,
+      params[1]
     )
     panel.bootstrap()
   }
 
+  const defineCanvasClass = () => {
+    if (mode === 'multiplayer') {
+      return 'panel mx-auto d-block'
+    }
+    return 'panel'
+  }
+
   useEffect(() => {
     init()
-    window.addEventListener('resize', () => {
-      const { clientWidth, clientHeight } = document.documentElement
-      setWidth(clientWidth)
-      setHeight(clientHeight - 8)
-      panel.width = width
-      panel.height = height
-    });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -43,13 +64,11 @@ export default function PanelComponent() {
     <>
       <TopBar
         height={topBarHeight}
-        score={score}
-        lastScore={lastScore}
-        higherScore={higherScore}
       />
+      { counterDown.value !== 0 && <CounterDown/>}
       <canvas
         id="panel"
-        className="panel"
+        className={defineCanvasClass()}
         width={width}
         height={height}
       />

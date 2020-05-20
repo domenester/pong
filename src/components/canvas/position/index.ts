@@ -7,8 +7,8 @@ export class Position {
     private X: number,
     private Y: number
   ) {
-    this.initialX = X
-    this.initialY = Y
+    this.initialX = Math.ceil(X)
+    this.initialY = Math.ceil(Y)
   }
 
   reset = () => {
@@ -25,10 +25,10 @@ export class Position {
   }
 
   setX = (value: number) => {
-    this.X = value
+    this.X = Math.ceil(value)
   }
 
   setY = (value: number) => {
-    this.Y = value
+    this.Y = Math.ceil(value)
   }
 }
