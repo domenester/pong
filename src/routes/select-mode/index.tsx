@@ -1,26 +1,7 @@
-import React, { useEffect } from 'react';
-import { Link, useHistory } from 'react-router-dom';
-import { useSocketServiceValue } from '../../services'
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 export const SelectModeRoute = () => {
-  const history = useHistory()
-  const {
-    createRoom,
-    onRoomCreated
-  } = useSocketServiceValue()
-
-  const handleMultiplayer = async () => {
-    await createRoom()
-  }
-
-  const handleRoomCreated = (data: any) => {
-    history.push(`/multi-player/${data}/1`)
-  }
-
-  useEffect(() => {
-    onRoomCreated(handleRoomCreated)    
-  }, [])
-
   return (
     <div className="select-mode centered">
       <Link
@@ -29,12 +10,12 @@ export const SelectModeRoute = () => {
       >
         Single Player
       </Link>
-      <button
+      <Link
+        to="/rooms"
         className="btn btn-success col-12 p-4 mb-5"
-        onClick={handleMultiplayer}
       >
         Multi Player
-      </button>
+      </Link>
     </div>
   )
 }

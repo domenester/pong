@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import './panel.scss';
-import { Panel } from '../canvas/panel';
 import { TopBar } from '../top-bar';
 import { useSocketServiceValue, ISocketService } from '../../services';
 import { getDimensions } from './util';
@@ -70,6 +69,7 @@ export default function PanelComponent({ mode }: IPanelComponent) {
     <>
       <TopBar
         height={topBarHeight}
+        mode={mode}
       />
       { counterDown.value !== 0 && <CounterDown/>}
       <canvas

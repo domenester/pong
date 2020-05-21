@@ -26,7 +26,6 @@ export abstract class BallEvents {
   }
 
   triggerReset = () => {
-    console.log('triggerReset: this.lastAction: ', this.lastAction);
     clearInterval(this.interval)
     this.timesHit = 0
     this.panel.reset()

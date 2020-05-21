@@ -1,6 +1,4 @@
 import { Stick } from "../stick";
-import { PanelSinglePlayer } from "../../panel/single-player";
-import { PanelMultiPlayer } from "../../panel/multi-player";
 import { Panel } from "../../panel";
 
 export class StickEvent {

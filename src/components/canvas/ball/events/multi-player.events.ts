@@ -14,37 +14,45 @@ export class BallEventsMultiPlayer extends BallEvents {
 
   bootstrap = () => {
     this.panel.socketService.onStartGame(this.countDownToStartGame)
-    this.panel.socketService.onBallOver(this.triggerReset)
+    this.panel.socketService.onBallOver((data) => {
+      this.panel.dispatch({
+        type: `increasePlayer${data}Score`, payload: null
+      })
+      if (this.timesHit === 0 && this.lastAction === this.initialAction) { return }
+      this.triggerReset()
+    })
   }
 
   touchLeft = () => {
-    const touch = this.ball.position.getX() <= this.ball.width
+    const touch = this.ball.position.getX() < this.ball.width
     if (touch) {
       if (this.ball.touchLeftStick()) {
         this.timesHit = this.timesHit + 1
-        this.panel.increaseScore()
+        this.panel.increaseHit()
         this.speedUp()
         return true
       }
       this.panel.socketService.ballOver(
         this.panel.room,
-        this.panel.getOtherPlayer()
+        this.panel.getOtherPlayer(),
+        2
       )
       this.triggerReset()
     }
   }
 
   touchRight = () => {
-    const touch = this.ball.position.getX() >= this.panel.width - this.ball.width
+    const touch = this.ball.position.getX() > this.panel.width - this.ball.width
     if (touch) {
       if (this.ball.touchRightStick()) {
         this.timesHit = this.timesHit + 1
-        this.panel.increaseScore()
+        this.panel.increaseHit()
         return true
       }
       this.panel.socketService.ballOver(
         this.panel.room,
-        this.panel.getOtherPlayer()
+        this.panel.getOtherPlayer(),
+        1
       )
       this.triggerReset()
     }
@@ -71,7 +79,7 @@ export class BallEventsMultiPlayer extends BallEvents {
 
   defineInterval = () => {
     this.interval = setInterval(
-      () => BallInterval(this).init(), 5
+      () => BallInterval(this).init(), 15
     )
   }
 }

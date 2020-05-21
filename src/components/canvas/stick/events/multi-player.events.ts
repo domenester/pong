@@ -13,8 +13,8 @@ export class StickEventMultiPlayer extends StickEvent {
     this.rightStick = panel.rightStick
   }
 
-  bootstrap = () => {
-    document.addEventListener('mousemove', this.onMouseMoveHandler);
+  bootstrap() {
+    super.bootstrap()
     this.panel.socketService.onMoveStick(
       (data: any) => {
         this.handleStickMove(data.y, this.panel.getOtherPlayer())

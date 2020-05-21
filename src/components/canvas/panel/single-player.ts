@@ -1,5 +1,6 @@
 import { TDispatch } from "../../../shared/state-handler";
 import { ISocketService } from "../../../services";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Panel, mode } from ".";
 import { BallEventsSinglePlayer } from "../ball/events/single-player.events";
 import { StickEventSinglePlayer } from "../stick/events/single-player.events";

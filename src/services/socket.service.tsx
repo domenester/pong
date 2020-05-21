@@ -5,14 +5,17 @@ type onFunction = (param: (data?: any) => any) => void
 type emitFunction = (...param: any) => void
 
 export interface ISocketService {
-  onMoveStick: onFunction,
-  onRoomCreated: onFunction,
-  onStartGame: onFunction,
-  onBallOver: onFunction,
-  ballOver: emitFunction,
-  createRoom: emitFunction,
   stickMoved: emitFunction,
+  onMoveStick: onFunction,
+  createRoom: emitFunction,
+  onRoomCreated: onFunction,
+  ballOver: emitFunction,
+  onBallOver: onFunction,
+  getRooms: emitFunction,
+  onGetRooms: onFunction,
   joinRoom: emitFunction,
+  onStartGame: onFunction,
+  connected: emitFunction
 }
 
 const buildValue = (): ISocketService => {
@@ -26,12 +29,15 @@ const buildValue = (): ISocketService => {
 
   const onStartGame = (startGame: () => any) => socket.on('startGame', () => startGame())
 
-  const onBallOver = (ballOver: () => any) => socket.on('ballOver', () => {
-    console.log('reseting ballOver')
-    ballOver()
-  })
+  const onBallOver = (
+    ballOver: (data: any) => any
+  ) => socket.on('ballOver', (data: any) => ballOver(data))
 
-  const ballOver = (roomId: string, to: string) => socket.emit('ballOver', {roomId, to})
+  const ballOver = (
+    roomId: string,
+    to: string,
+    pointOf: string
+  ) => socket.emit('ballOver', {roomId, to, pointOf})
 
   const createRoom = () => socket.emit('createRoom')
 
@@ -45,15 +51,26 @@ const buildValue = (): ISocketService => {
     y: number, to: number, room: string
   ) => socket.emit('stickMoved', { y, to, room })
 
+  const getRooms = () => socket.emit('getRooms')
+
+  const onGetRooms = (onGetRooms: (data: any) => any) => {
+    socket.on('onGetRooms', onGetRooms)
+  }
+
+  const connected = () => socket.emit('connected')
+
   return {
-    onMoveStick,
-    onRoomCreated,
-    onStartGame,
-    onBallOver,
-    createRoom,
     stickMoved,
+    onMoveStick,
+    createRoom,
+    onRoomCreated,
+    ballOver,
+    onBallOver,
+    getRooms,
+    onGetRooms,
+    onStartGame,
     joinRoom,
-    ballOver
+    connected
   };
 }
 

@@ -2,6 +2,7 @@ import { Position } from "../position";
 import { Stick } from "../stick";
 import { TDispatch } from "../../../shared/state-handler";
 import { ISocketService } from "../../../services";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Panel, mode } from ".";
 import { BallEventsMultiPlayer } from "../ball/events/multi-player.events";
 import { StickEventMultiPlayer } from "../stick/events/multi-player.events";

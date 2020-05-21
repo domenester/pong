@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { mode } from '../canvas/panel/'
 
 export const getDimensions = (mode: mode) => {

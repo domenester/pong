@@ -19,7 +19,7 @@ export class BallEventsSinglePlayer extends BallEvents {
     if (touch) {
       if (this.ball.touchLeftStick()) {
         this.timesHit = this.timesHit + 1
-        this.panel.increaseScore()
+        this.panel.increaseHit()
         this.speedUp()
         return true
       }
@@ -33,7 +33,7 @@ export class BallEventsSinglePlayer extends BallEvents {
 
   defineInterval = () => {
     this.interval = setInterval(
-      () => BallInterval(this).init(), 5
+      () => BallInterval(this).init(), 15
     )
   }
 }

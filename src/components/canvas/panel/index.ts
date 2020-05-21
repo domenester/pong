@@ -22,8 +22,8 @@ export abstract class Panel {
   public leftStick: Stick
   public ball: Ball
 
-  public score = 0
-  public higherScore = 0
+  public hit = 0
+  public higherHit = 0
 
   constructor(
     public mode: mode,
@@ -65,17 +65,17 @@ export abstract class Panel {
     )
   }
 
-  increaseScore = () => {
-    this.score = this.score + 1
+  increaseHit = () => {
+    this.hit = this.hit + 1
     this.dispatch({
       type: 'setPanel',
-      payload: { score: this.score }
+      payload: { hit: this.hit }
     })
-    if (this.score > this.higherScore) {
-      this.higherScore = this.score
+    if (this.hit > this.higherHit) {
+      this.higherHit = this.hit
       this.dispatch({
         type: 'setPanel',
-        payload: { higherScore: this.score }
+        payload: { higherHit: this.hit }
       })
     }
   }
@@ -83,9 +83,9 @@ export abstract class Panel {
   reset = () => {
     this.dispatch({
       type: 'setPanel',
-      payload: { score: 0, lastScore: this.score }
+      payload: { hit: 0, lastHit: this.hit }
     })
-    this.score = 0
+    this.hit = 0
     this.ball.clear()
     this.ball.resetSpeed()
     this.ball.position.reset()

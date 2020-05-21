@@ -6,6 +6,8 @@ import { createBrowserHistory } from "history";
 import { SelectModeRoute } from './routes/select-mode';
 import { SocketServiceProvider } from './services/socket.service';
 import { StateProvider } from './shared/state-handler';
+import { RoomsRoute } from './routes/rooms';
+import Root from './components/root';
 
 function App() {
   return (
@@ -15,15 +17,37 @@ function App() {
           <Route
             exact
             path="/"
-            component={SelectModeRoute}
+            component={() => 
+              <Root
+                Component={SelectModeRoute}
+              />
+            }
           />
           <Route
             path="/single-player"
-            component={() => <Panel mode={'singleplayer'}/>}
+            component={() => 
+              <Root
+                Component={Panel}
+                props={{mode: 'singleplayer'}}
+              />
+            }
           />
           <Route
             path="/multi-player"
-            component={() => <Panel mode={'multiplayer'}/>}
+            component={() => 
+              <Root
+                Component={Panel}
+                props={{mode: 'multiplayer'}}
+              />
+            }
+          />
+          <Route
+            path="/rooms"
+            component={() =>
+              <Root
+                Component={RoomsRoute}
+              />
+            }
           />
         </Router>
       </SocketServiceProvider>

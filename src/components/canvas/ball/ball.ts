@@ -15,7 +15,7 @@ export class Ball {
     public width: number,
     public height: number,
   ) {
-    this.speed = 2
+    this.speed = 6
   }
 
   getLeftSide = () => {
@@ -27,7 +27,7 @@ export class Ball {
   }
 
   resetSpeed = () => {
-    this.speed = 2
+    this.speed = 6
   }
 
   touchStick = () => {
